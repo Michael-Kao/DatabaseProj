@@ -1,6 +1,24 @@
 <?php
 require 'config.php';
-echo $_SESSION["id"];
+$flag = "";
+if (empty($_SESSION)) {
+    $flag = '<form method="get">
+                <input type="submit" name="login" value="login"/>
+            </form>';
+}
+else{
+    $flag = '<form method="post">
+                <input type="submit" name="logout" value="logout"/>
+            </form>';
+}
+if(isset($_GET['login'])){
+    header("Location: login.php");
+    exit();
+}
+else if(isset($_POST['logout'])){
+    header('Location: logout.php');
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,6 +33,7 @@ echo $_SESSION["id"];
 <body>
     <main>
         <h1> Welcome </h1>
+        <?php echo $flag; ?>
     </main>
 </body>
 
