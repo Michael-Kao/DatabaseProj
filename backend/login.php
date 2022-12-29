@@ -1,46 +1,19 @@
 <?php
 require 'config.php';
-if (isset($_POST['submit'])) {
-    $usernameemail = $_POST['usernameemail'];
-    $password = $_POST['password'];
-    include 'db.php';
-    $query = ("select * from user where (Username = ? or UserEmail = ?) or UserPassword = ?");
-    $stmt = $db->prepare($query);
-    $error = $stmt->execute(array($usernameemail, $usernameemail, $user_password));
-    $result = $stmt->fetchAll();
-    if (count($result) == 1) {
-        $_SESSION['id'] = $result[0]['Uuid'];
-        header("Location: index.php");
-    } else {
-        echo "<script> Incorrect username or password </script>";
-    }
+$request = json_decode(file_get_contents('php://input'));
+$user_name_or_email = $request->username;
+$user_password = $request->password;
+include 'db.php';
+$query = ("select * from user where (UserName = ? or UserEmail = ?) or UserPassword = ?");
+$stmt = $db->prepare($query);
+$error = $stmt->execute(array($user_name_or_email, $user_name_or_email, $user_password));
+$result = $stmt->fetchAll();
+if (count($result) == 1) {
+    $_SESSION['id'] = $result[0]['Uuid'];
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(array('id' => $result[0]['Uuid'], 'username' => $result[0]['UserName']));
+} else {
+    header("HTTP/1.1 401 unauthorized");
+    echo "Incorrect username or password";
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://www.phptutorial.net/app/css/style.css">
-    <title>Chatroom</title>
-</head>
-
-<body>
-    <main>
-        <form method="post" action="login.php" autocomplete="off">
-            <h1>Login</h1>
-            <div>
-                <label for="usernameemail">Username or Email:</label>
-                <input type="text" name="usernameemail" id="usernameemail">
-            </div>
-            <div>
-                <label for="password">Password:</label>
-                <input type="password" name="password" id="password">
-            </div>
-            <button type="submit" name="submit">Login</button>
-        </form>
-    </main>
-</body>
-
-</html>

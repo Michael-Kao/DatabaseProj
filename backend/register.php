@@ -22,7 +22,7 @@ if(!empty($_POST) && $_SERVER['REQUEST_METHOD'] == 'POST'){
             $query = ("insert into user (Uuid, Username, UserEmail, UserPassword) values (?, ?, ?, ?)");
             $stmt = $db->prepare($query);
             $error = $stmt->execute(array($uuid, $username, $email, $user_password));
-            header("Location: login.php");
+            // header("Location: /DatabaseProj/frontend/html/login.html");
             exit();
         }
     }
