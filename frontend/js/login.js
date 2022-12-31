@@ -16,10 +16,13 @@ function login(username, password) {
         }),
         success: function(data) {
             window.location.replace("/DatabaseProj/frontend/html/index.html");
-            console.log(data);
+            // console.log(data);
         },
         error: function(data) {
-            console.log(data);
+            // let status_code = data['status'];
+            // let status = data['responseJSON']['status'];
+            let response = data['responseJSON']['message'];
+            alert(response);
         }
     })
 }
