@@ -4,7 +4,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method == 'GET') {
     // echo $_COOKIE;
-    if(isset($_SESSION['id']) && isset($_COOKIE['user']) && $_SESSION['id'] = $_COOKIE['user']) {
+    if(isset($_SESSION['id']) && isset($_COOKIE['user']) && $_SESSION['id'] == $_COOKIE['user']) {
         header("HTTP/1.1 200 OK");
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(array('status' => "logged in",
