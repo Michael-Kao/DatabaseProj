@@ -1,12 +1,8 @@
 $(document).ready(function() {
-    // let test = document.getElementsByName('number');
-    // let test = $('input[name="number"]')
-    // console.log(test[0].value);
     $.ajax({
         url: '/DatabaseProj/backend/new_chat.php',
         method: 'get',
-        success: function(data) {
-            // alert("success");
+        success: function(res) {
         },
         error: function(jqXHR, textStatus, errorThrown) {
             alert(errorThrown);
@@ -15,14 +11,14 @@ $(document).ready(function() {
             console.log(textStatus);
             console.log(errorThrown);
 
-            if(errorThrown == 'Unauthorized'){
+
+            if(jqXHR.status == 401) {
                 location.replace("login.html");
             }
         }
     });
 
     $('#add-member').click(function() {
-        console.log("adsf");
         let area = $('<div></div>').attr('class', 'input-group mb-3');
         let new_member = $('<input>').attr('name', 'members')
                                       .attr('type', 'text')
@@ -40,7 +36,6 @@ $(document).ready(function() {
             console.log(member.value);
             members_list.push(member.value);
         }
-        // console.log($('input[name="members"]'));
         $.ajax({
             url: '/DatabaseProj/backend/new_chat.php',
             method: 'post',
@@ -50,16 +45,21 @@ $(document).ready(function() {
                 room_name: $('input[name="room-name"]').val(),
                 members: members_list
             }),
-            success: function(data) {
+            success: function(res) {
                 // alert("success");
-                console.log(data);
-                // location.replace("chatroom.html");
+                console.log(res);
+                location.replace("index.html");
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                alert("error");
+                alert(errorThrown);
+
                 console.log(jqXHR);
                 console.log(textStatus);
                 console.log(errorThrown);
+
+                if(jqXHR.status == 401) {
+                    location.replace("login.html");
+                }
             }
         });
     });

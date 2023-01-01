@@ -17,13 +17,20 @@ function register(username, email, password, password2) {
             password: password,
             password2: password2
         }),
-        success: function(data) {
-            window.location.replace("/DatabaseProj/frontend/html/index.html");
-            console.log(data['responseJSON']);
+        success: function(res) {
+            location.replace("index.html");
+            console.log(res);
         },
-        error: function(data) {
-            let response = data['responseJSON']['message'];
+        error: function(res) {
+            let status_code = res['status'];
+            let response = res['responseJSON']['message'];
             alert(response);
+            if (status_code == 401) {
+                window.location.replace("/resbaseProj/frontend/html/login.html");
+            }
+            else {
+                location.reload();
+            }
         }
     })
 }
