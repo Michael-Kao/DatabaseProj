@@ -1,83 +1,70 @@
 <?php
 require 'config.php';
 
+class MessageRequest {
+    public $message;
+}
+
 include 'db.php';
 include 'function.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+authorize();
+
 if ($method == 'GET') {
-    // echo 'create chatroom';
-    if (isset($_SESSION['id']) && isset($_COOKIE['user']) && $_SESSION['id'] == $_COOKIE['user']) {
 
-        $request = json_decode(file_get_contents('php://input'));
-        $params = array();
-        parse_str($_SERVER['QUERY_STRING'], $params);
-        // var_dump($request);
-        
-        if(!isset($params['room_id'])){
-            header('HTTP/1.1 400 Bad Request');
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(
-                array(
-                    'status' => 'Bad Request',
-                    'message' => 'Bad Request'
-                )
-            );
-            exit();
-        }
+    $request = json_decode(file_get_contents('php://input'));
+    $params = array();
+    parse_str($_SERVER['QUERY_STRING'], $params);
 
-        //check if the user is in the chatroom and get chatroom info
-        $room_id = $params['room_id'];
-        $user_id = $_COOKIE['user'];
-        $query = ("select * from participants join chatroom on chatroom.Id = participants.RoomID where UserID=? and RoomID=?");
-        $stmt = $db->prepare($query);
-        $error = $stmt->execute(array($user_id, $room_id));
-        $result = $stmt->fetchAll();
+    handle_error(!isset($params['room_id']), 400, 'Missing room_id.');
 
-        if (!$error) {
-            header('HTTP/1.1 500 Internal Server Error');
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(
-                array(
-                    'status' => 'Internal Server Error',
-                    'message' => 'Something worng when searching chatroom.'
-                )
-            );
-            exit();
-        }
+    //check if the user is in the chatroom and get chatroom info
+    $room_id = $params['room_id'];
+    $user_id = $_COOKIE['user'];
+    $query = ("select * from participants join chatroom on chatroom.Id = participants.RoomID where UserID=? and RoomID=?");
+    $stmt = $db->prepare($query);
+    $error = $stmt->execute(array($user_id, $room_id));
+    $result = $stmt->fetchAll();
 
-        if(count($result) != 1){
-            header('HTTP/1.1 403 Forbidden');
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(
-                array(
-                    'status' => 'Forbidden',
-                    'message' => 'Forbidden'
-                )
-            );
-            exit();
-        }
+    handle_error(!$error, 500, 'Something worng when searching chatroom.');
+    handle_error(count($result) != 1, 403, 'Forbidden.');
+    $room = $result[0];
 
-        header('HTTP/1.1 200 OK');
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(
-            array(
-                'status' => 'OK',
-                'message' => 'Get chatroom successfully.',
-                'room' => $result[0]
-            )
-        );
-    }
+    $query = ("select * from Message, user where user.Uuid = Message.UserID and Message.RoomID=?");
+    $stmt = $db->prepare($query);
+    $error = $stmt->execute(array($room_id));
+    $result = $stmt->fetchAll();
+
+    handle_error(!$error, 500, 'Something worng when searching chatroom.');
+
+    success_res(200, 'Get chatroom successfully.', array('room' => $room, 'messages' => $result));
+} else if ($method == 'POST') {
+
+    $request = json_decode(file_get_contents('php://input'));
+    $params = array();
+    parse_str($_SERVER['QUERY_STRING'], $params);
+
+    handle_error(!isset($params['room_id']), 400, 'Missing room_id.');
+    handle_error(!validate_data($request, new MessageRequest()), 400, 'Data is worng in the new chat request body.');
+
+    //send message to chatroom
+    $msg_id = getuuid();
+    $room_id = $params['room_id'];
+    $user_id = $_COOKIE['user'];
+    $message = $request->message;
+    $ipv4 = $_SERVER['REMOTE_ADDR'];
+    $date = date('Y-m-d H:i:s');
+
+    $query = ("insert into message (Id, RoomID, UserID, Message, Ipv4, Date) values (?, ?, ?, ?, ?, ?)");
+    $stmt = $db->prepare($query);
+    $error = $stmt->execute(array($msg_id, $room_id, $user_id, $message, $ipv4, $date));
+
+    handle_error(!$error, 500, 'Something worng when sending message.');
+
+    success_res(200, 'Send message successfully.', []);
 } else {
-    header('HTTP/1.1 405 Method Not Allowed');
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(
-        array(
-            'status' => 'Method Not Allowed',
-            'message' => 'Method Not Allowed'
-        )
-    );
-    exit();
+    handle_error(true, 405, 'Method not allowed.');
 }
 ?>

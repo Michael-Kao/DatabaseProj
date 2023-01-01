@@ -11,119 +11,53 @@ include 'db.php';
 include 'function.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
+
+authorize();
+
 if ($method == 'POST') {
-    // echo 'create chatroom';
-    if (isset($_SESSION['id']) && isset($_COOKIE['user']) && $_SESSION['id'] == $_COOKIE['user']) {
+    $request = json_decode(file_get_contents('php://input'));
 
-        $request = json_decode(file_get_contents('php://input'));
-        // var_dump($request);
+    handle_error(!validate_data($request, new CreateChatRequest()), 400, 'Data is worng in the new chat request body.');
 
-        if (!validate_data($request, new CreateChatRequest())) {
-            header('HTTP/1.1 400 Bad Request');
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(
-                array(
-                    'status' => 'Bad request',
-                    'message' => 'Data is worng in the new chat request body.'
-                )
-            );
-            exit();
-        }
+    $room_name = $request->room_name;
+    $members = $request->members;
+    $create_on = date('Y-m-d H:i:s');
+    array_unique($members);
 
-        $room_name = $request->room_name;
-        $members = $request->members;
-        $create_on = date('Y-m-d H:i:s');
-        array_unique($members);
-
-        //get user id
-        $members_id = array($_SESSION['id']);
-        foreach ($members as $member_email) {
-            $query = ("select Uuid from user where UserEmail= ?");
-            $stmt = $db->prepare($query);
-            $error = $stmt->execute(array($member_email));
-            $result = $stmt->fetchAll();
-            if (!$error) {
-                header('HTTP/1.1 500 Internal Server Error');
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(
-                    array(
-                        'status' => 'Internal Server Error',
-                        'message' => 'Something worng when searching user.'
-                    )
-                );
-                exit();
-            }
-            array_push($members_id, $result[0]['Uuid']);
-        }
-        //create chatroom
-        $room_id = getuuid();
-        $query = ("insert into chatroom (id, Name, Status, CreateOn) values (?, ?, ?, ?)");
+    //get user id
+    $members_id = array($_SESSION['id']);
+    foreach ($members as $member_email) {
+        $query = ("select Uuid from user where UserEmail= ?");
         $stmt = $db->prepare($query);
-        $error = $stmt->execute(array($room_id, $room_name, true, $create_on));
+        $error = $stmt->execute(array($member_email));
+        $result = $stmt->fetchAll();
 
-        if (!$error) {
-            header('HTTP/1.1 500 Internal Server Error');
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(
-                array(
-                    'status' => 'Internal Server Error',
-                    'message' => 'Something worng when inserting chatroom.'
-                )
-            );
-            exit();
-        }
+        handle_error(!$error, 500, 'Something worng when searching user.');
 
-        //create chatroom member
-        foreach ($members_id as $member_id) {
-            $query = ("insert into participants (UserID, RoomID) values (?, ?)");
-            $stmt = $db->prepare($query);
-            $error = $stmt->execute(array($member_id, $room_id));
-            if (!$error) {
-                header('HTTP/1.1 500 Internal Server Error');
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(
-                    array(
-                        'status' => 'Internal Server Error',
-                        'message' => 'Something worng when adding memeber of chatroom.'
-                    )
-                );
-                exit();
-            }
-        }
-
-        header('HTTP/1.1 201 created');
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(array('id' => $room_id, 'name' => $room_name));
-    } else {
-        header('HTTP/1.1 401 Unauthorized');
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(
-            array(
-                'status' => 'Unauthorized',
-                'message' => 'You are not logged in.'
-            )
-        );
+        array_push($members_id, $result[0]['Uuid']);
     }
+
+    //create chatroom
+    $room_id = getuuid();
+    $query = ("insert into chatroom (id, Name, Status, CreateOn) values (?, ?, ?, ?)");
+    $stmt = $db->prepare($query);
+    $error = $stmt->execute(array($room_id, $room_name, true, $create_on));
+
+    handle_error(!$error, 500, 'Something worng when creating chatroom.');
+
+    //create chatroom member
+    foreach ($members_id as $member_id) {
+        $query = ("insert into participants (UserID, RoomID) values (?, ?)");
+        $stmt = $db->prepare($query);
+        $error = $stmt->execute(array($member_id, $room_id));
+
+        handle_error(!$error, 500, 'Something worng when creating chatroom member.');
+    }
+
+
+    success_res(201, 'Create chatroom successfully.', array('id' => $room_id, 'name' => $room_name));
 } else if ($method == 'GET') {
-    if (!(isset($_SESSION['id']) && isset($_COOKIE['user']) && $_SESSION['id'] == $_COOKIE['user'])) {
-        header('HTTP/1.1 401 Unauthorized');
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(
-            array(
-                'status' => 'Unauthorized',
-                'message' => 'You are not logged in.'
-            )
-        );
-
-    }
 } else {
-        header('HTTP/1.1 405 Method Not Allowed');
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(
-            array(
-                'status' => 'Method Not Allowed',
-                'message' => 'This method not allowed.'
-            )
-        );
-} 
+    handle_error(true, 405, 'Method not allowed.');
+}
 ?>

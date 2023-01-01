@@ -22,12 +22,12 @@ function logout() {
     $.ajax({
         url: '/DatabaseProj/backend/logout.php',
         method: 'post',
-        success: function (data) {
-            // alert("success");
+        success: function (res) {
             location.reload();
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            alert("error");
+            alert(errorThrown);
+
             console.log(jqXHR);
             console.log(textStatus);
             console.log(errorThrown);
@@ -47,15 +47,8 @@ $(document).ready(function () {
         $.ajax({
             url: '/DatabaseProj/backend/index.php',
             method: 'get',
-            success: function (data) {
-                // alert("success");
-                // console.log(data);
-                // return;
-
-                // let room_area = $('<div></div>').addClass('list-group');
-                $.each(data['room_list'], function (index, value) {
-                    // console.log(value);
-                    // return;
+            success: function (res) {
+                $.each(res['room_list'], function (index, value) {
                     let room_item = $('<a></a>').addClass('list-group-item list-group-item-action')
                         .attr('aria-current', 'true')
                         .attr('href', 'chatroom.html?room_id=' + value['RoomID']);
@@ -65,11 +58,8 @@ $(document).ready(function () {
                     room.append(room_name, room_created_date);
                     room_item.append(room);
                     $room_area.append(room_item);
-                    // console.log($room_area.length);
                 });
-                // console.log(room_area);
                 $room_list.append($room_area);
-                // console.log($room_area.length);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
@@ -83,9 +73,7 @@ $(document).ready(function () {
     $.ajax({
         url: '/DatabaseProj/backend/get_session.php',
         method: 'get',
-        success: function (data) {
-            // alert("success");
-            console.log(data);
+        success: function (res) {
             let session = document.cookie.split("; ");
             let session_value = '';
             try {
