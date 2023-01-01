@@ -2,6 +2,25 @@ $(document).ready(function() {
     // let test = document.getElementsByName('number');
     // let test = $('input[name="number"]')
     // console.log(test[0].value);
+    $.ajax({
+        url: '/DatabaseProj/backend/new_chat.php',
+        method: 'get',
+        success: function(data) {
+            // alert("success");
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert(errorThrown);
+
+            console.log(jqXHR);
+            console.log(textStatus);
+            console.log(errorThrown);
+
+            if(errorThrown == 'Unauthorized'){
+                location.replace("login.html");
+            }
+        }
+    });
+
     $('#add-member').click(function() {
         console.log("adsf");
         let area = $('<div></div>').attr('class', 'input-group mb-3');
