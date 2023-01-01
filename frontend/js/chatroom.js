@@ -37,7 +37,7 @@ $(document).ready(function () {
                     msg = $('<p></p>').addClass('text-start').text(`${value['UserName']}:${value['Message']}`);
                 }
                 $room_content.append(msg_date, msg);
-                console.log(value);
+                // console.log(value);
             });
         },
         error: function (jqXHR, textStatus, errorThrown) {
