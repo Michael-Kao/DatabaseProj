@@ -49,7 +49,7 @@ if($method == 'POST') {
             $stmt = $db->prepare($query);
             $error = $stmt->execute(array($uuid, $username, $email, $user_password));
 
-            header("HTTP/1.1 200 OK");
+            header("HTTP/1.1 201 created");
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(array('id' => $uuid, 'username' => $username));
             exit();

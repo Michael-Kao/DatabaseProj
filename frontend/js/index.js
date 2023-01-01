@@ -1,3 +1,22 @@
+let register_button = $('<a></a>').addClass('btn btn-secondary')
+                                    .attr('id', 'register-page')
+                                    .attr('type', 'button')
+                                    .attr('href', 'register.html')
+                                    .text('Register');
+let login_button = $('<a></a>').addClass('btn btn-secondary')
+                                .attr('id', 'login-page')
+                                .attr('type', 'button')
+                                .attr('href', 'login.html')
+                                .text('Login');
+let logout_button = $('<button></button>').addClass('btn btn-secondary')
+                                            .attr('onclick', 'logout()')
+                                            .text('Logout');
+let new_chat_button = $('<a></a>').addClass('btn btn-secondary')
+                                  .attr('type', 'button')
+                                  .attr('id', 'new-chat')
+                                  .attr('href', 'new_chat.html')
+                                  .text('New Chatroom');
+
 function logout() {
     console.log("asdf");
     $.ajax({
@@ -17,12 +36,13 @@ function logout() {
 }
 
 $(document).ready(function() {
-    let $container = $('#container');
+    let $left_cntr = $('#home-container #left-side');
+    let $right_cntr = $('#home-container #right-side');
     $.ajax({
         url: '/DatabaseProj/backend/get_session.php',
         method: 'get',
         success: function(data) {
-            alert("success");
+            // alert("success");
             console.log(data);
             let session = document.cookie.split("; ");
             let session_value = '';
@@ -38,22 +58,12 @@ $(document).ready(function() {
                 console.log(err);
             }
 
-            let register_button = $('<a></a>').addClass('btn btn-secondary')
-                                              .attr('type', 'button')
-                                              .attr('href', 'register.html')
-                                              .text('Register');
-            let login_button = $('<a></a>').addClass('btn btn-secondary')
-                                            .attr('type', 'button')
-                                            .attr('href', 'login.html')
-                                            .text('Login');
-            let logout_button = $('<button></button>').addClass('btn btn-secondary')
-                                                      .attr('onclick', 'logout()')
-                                                      .text('Logout');
             if(session_value != ''){
-                $container.append(logout_button);
+                $right_cntr.append(logout_button);
+                $left_cntr.append(new_chat_button);
             }
             else{
-                $container.append(register_button, login_button);
+                $right_cntr.append(register_button, login_button);
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
