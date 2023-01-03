@@ -1,5 +1,5 @@
-$(document).ready(function() {
-    $('#add-mem').click(function() {
+$(document).ready(function () {
+    $('#add-mem').click(function () {
         let area = $('<div></div>').attr('class', 'input-group mb-3');
         let new_member = $('<input>').attr('name', 'members')
                                       .attr('type', 'text')
