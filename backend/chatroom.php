@@ -23,7 +23,7 @@ if ($method == 'GET') {
     //check if the user is in the chatroom and get chatroom info
     $room_id = $params['room_id'];
     $user_id = $_COOKIE['user'];
-    $query = ("select * from participants join chatroom on chatroom.Id = participants.RoomID where UserID=? and RoomID=?");
+    $query = ("select * from participants join room on room.Id = participants.RoomID where UserID=? and RoomID=?");
     $stmt = $db->prepare($query);
     $error = $stmt->execute(array($user_id, $room_id));
     $result = $stmt->fetchAll();
@@ -32,6 +32,13 @@ if ($method == 'GET') {
     handle_error(count($result) != 1, 403, 'Forbidden.');
     $room = $result[0];
 
+    $query = ("select count(*) as count from participants where RoomID=?");
+    $stmt = $db->prepare($query);
+    $error = $stmt->execute(array($room_id));
+    $result = $stmt->fetchAll();
+
+    $member_count = $result[0]['count'];
+
     $query = ("select * from Message, user where user.Uuid = Message.UserID and Message.RoomID=?");
     $stmt = $db->prepare($query);
     $error = $stmt->execute(array($room_id));
@@ -39,7 +46,7 @@ if ($method == 'GET') {
 
     handle_error(!$error, 500, 'Something worng when searching chatroom.');
 
-    success_res(200, 'Get chatroom successfully.', array('room' => $room, 'messages' => $result));
+    success_res(200, 'Get chatroom successfully.', array('room' => $room, 'count' => $member_count, 'messages' => $result));
 } else if ($method == 'POST') {
 
     $request = json_decode(file_get_contents('php://input'));

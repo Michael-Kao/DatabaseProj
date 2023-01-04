@@ -1,21 +1,23 @@
-let register_button = $('<a></a>').addClass('btn btn-secondary')
+const register_button = $('<a></a>').addClass('btn btn-link text-white text-decoration-none')
     .attr('id', 'register-page')
-    .attr('type', 'button')
     .attr('href', 'register.html')
     .text('Register');
-let login_button = $('<a></a>').addClass('btn btn-secondary')
+const login_button = $('<a></a>').addClass('btn btn-link text-white text-decoration-none')
     .attr('id', 'login-page')
-    .attr('type', 'button')
     .attr('href', 'login.html')
     .text('Login');
-let logout_button = $('<button></button>').addClass('btn btn-secondary')
+const logout_button = $('<a></a>').addClass('btn btn-link text-white text-decoration-none')
     .attr('onclick', 'logout()')
     .text('Logout');
-let new_chat_button = $('<a></a>').addClass('btn btn-secondary')
-    .attr('type', 'button')
+const new_chat_button = $('<a></a>').addClass('btn btn-link text-white text-decoration-none')
     .attr('id', 'new-chat')
     .attr('href', 'new_chat.html')
     .text('New Chatroom');
+
+const user_button = $('<a></a>').addClass('btn btn-link text-white text-decoration-none')
+    .attr('id', 'user-page')
+    .attr('href', 'user.html')
+    .text('Profile');
 
 function logout() {
     console.log("asdf");
@@ -51,7 +53,7 @@ $(document).ready(function () {
                 $.each(res['room_list'], function (index, value) {
                     let room_item = $('<a></a>').addClass('list-group-item list-group-item-action')
                         .attr('aria-current', 'true')
-                        .attr('href', 'chatroom.html?room_id=' + value['RoomID']);
+                        .attr('href', `chatroom.html?room_id=${value['RoomID']}`);
                     let room = $('<div></div>').addClass('d-flex w-100 justify-content-between');
                     let room_name = $('<h5></h5>').addClass('mb-1').text(value['Name']);
                     let room_created_date = $('<small></small>').text(value['CreateOn']);
@@ -91,6 +93,7 @@ $(document).ready(function () {
             if (session_value != '') {
                 $right_cntr.append(logout_button);
                 $left_cntr.append(new_chat_button);
+                $left_cntr.append(user_button);
                 list_rooms();
             }
             else {
