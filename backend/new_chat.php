@@ -34,7 +34,7 @@ if ($method == 'POST') {
 
         handle_error(!$error, 500, 'Something worng when searching user.');
 
-        array_push($members_id, $result[0]['Uuid']);
+        if(count($result) == 1) array_push($members_id, $result[0]['Uuid']);
     }
 
     //create chatroom

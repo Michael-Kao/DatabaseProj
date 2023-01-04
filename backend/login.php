@@ -23,7 +23,7 @@ if($method == 'POST') {
     if (count($result) == 1) {
         $_SESSION['id'] = $result[0]['Uuid'];
 
-        setcookie("user", $_SESSION['id'], time() + (86400 * 30), "/");
+        setcookie("user", $_SESSION['id'], time() + (86400), "/");
         success_res(200, 'Login successfully.', array('id' => $result[0]['Uuid'], 'name' => $result[0]['UserName']));
     } else {
         handle_error(true, 401, 'Username or password is wrong.');
